@@ -1,77 +1,172 @@
 
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carte Leaflet - Béni Mellal</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Géoportail du campus IAV</title>
   <link rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    header {
-      background: #176b55;
-      color: white;
-      text-align: center;
-      padding: 15px;
-    }
-
-    #map {
-      height: 85vh;
-      width: 100%;
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; color: #24332d; }
+    header { background: #176b55; color: white; padding: 18px; }
+    header h1 { margin: 0 0 6px; font-size: 23px; }
+    header p { margin: 0; font-size: 14px; }
+    .layout { display: flex; min-height: 80vh; }
+    aside { width: 290px; padding: 18px; background: #f3f6f4; }
+    aside h2 { font-size: 18px; margin-top: 0; }
+    input { width: 100%; padding: 11px; margin-bottom: 16px;
+            border: 1px solid #bbb; border-radius: 6px; }
+    .category { display: block; padding: 10px 0; }
+    .category input { width: auto; margin: 0 8px 0 0; }
+    button { padding: 10px 12px; border: 0; border-radius: 6px;
+             background: #176b55; color: white; cursor: pointer; }
+    #map { flex: 1; min-height: 550px; }
+    #results { font-size: 14px; margin-top: 16px; }
+    .place { padding: 9px 0; border-bottom: 1px solid #ddd; }
+    .place button { margin-top: 5px; }
+    footer { padding: 12px; text-align: center; font-size: 12px; }
+    @media (max-width: 700px) {
+      .layout { flex-direction: column; }
+      aside { width: 100%; }
+      #map { min-height: 60vh; }
     }
   </style>
 </head>
 <body>
+<header>
+  <h1>Géoportail du campus IAV</h1>
+  <p>Explorer les lieux et les équipements du campus</p>
+</header>
 
-  <header>
-    <h2>Carte interactive de Béni Mellal</h2>
-    <p>TP de cartographie avec Leaflet</p>
-  </header>
+<div class="layout">
+  <aside>
+    <h2>Rechercher un lieu</h2>
+    <input id="search" type="search"
+           placeholder="Ex. : bibliothèque">
 
+    <h2>Catégories</h2>
+    <label class="category">
+      <input type="checkbox" value="Enseignement" checked>
+      Enseignement
+    </label>
+    <label class="category">
+      <input type="checkbox" value="Restauration" checked>
+      Restauration
+    </label>
+    <label class="category">
+      <input type="checkbox" value="Services" checked>
+      Services
+    </label>
+    <label class="category">
+      <input type="checkbox" value="Espaces verts" checked>
+      Espaces verts
+    </label>
+
+    <button id="reset">Vue générale</button>
+    <div id="results"></div>
+  </aside>
   <div id="map"></div>
+</div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<footer>
+  Carte réalisée avec Leaflet · Fond © OpenStreetMap contributors
+</footer>
 
-  <script>
-    // Centrer la carte sur Béni Mellal
-    const beniMellal = [32.3373, -6.3498];
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Centre approximatif du campus IAV, Rabat.
+  const centre = [33.971, -6.853];
 
-    const map = L.map('map').setView(beniMellal, 12);
+  const map = L.map('map').setView(centre, 16);
 
-    // Ajouter le fond de carte OpenStreetMap
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-    // Ajouter un marqueur sur la ville
-    L.marker(beniMellal)
-      .addTo(map)
-      .bindPopup('<b>Béni Mellal</b><br>Maroc')
-      .openPopup();
+  // Lieux de démonstration : remplacer par les positions réelles du campus.
+  const lieux = [
+    { nom: "Campus IAV", categorie: "Enseignement",
+      coords: [33.971, -6.853],
+      description: "Point central de démonstration." },
+    { nom: "Bâtiment d'enseignement A", categorie: "Enseignement",
+      coords: [33.972, -6.854],
+      description: "Emplacement fictif à vérifier." },
+    { nom: "Bibliothèque", categorie: "Services",
+      coords: [33.9705, -6.852],
+      description: "Emplacement fictif à vérifier." },
+    { nom: "Restaurant universitaire", categorie: "Restauration",
+      coords: [33.970, -6.854],
+      description: "Emplacement fictif à vérifier." },
+    { nom: "Espace vert", categorie: "Espaces verts",
+      coords: [33.972, -6.8515],
+      description: "Emplacement fictif à vérifier." }
+  ];
 
-    // Dessiner un cercle rouge de 2 km de rayon
-    L.circle(beniMellal, {
-      color: 'red',
-      fillColor: '#ff3333',
-      fillOpacity: 0.2,
-      radius: 2000,
-      weight: 3
-    }).addTo(map)
-      .bindPopup('Zone circulaire autour de Béni Mellal : rayon de 2 km');
+  const groupe = L.layerGroup().addTo(map);
+  const search = document.getElementById('search');
+  const results = document.getElementById('results');
+  const cases = [...document.querySelectorAll('.category input')];
 
-  </script>
+  function afficherLieux() {
+    groupe.clearLayers();
+    results.innerHTML = '';
+
+    const texte = search.value.trim().toLocaleLowerCase('fr');
+    const categories = cases.filter(c => c.checked).map(c => c.value);
+
+    const filtres = lieux.filter(l =>
+      l.nom.toLocaleLowerCase('fr').includes(texte) &&
+      categories.includes(l.categorie)
+    );
+
+    filtres.forEach(l => {
+      L.marker(l.coords).addTo(groupe)
+        .bindPopup('<b>' + l.nom + '</b><br>' +
+                   l.categorie + '<br>' + l.description);
+
+      const div = document.createElement('div');
+      div.className = 'place';
+
+      const titre = document.createElement('strong');
+      titre.textContent = l.nom;
+      div.appendChild(titre);
+      div.appendChild(document.createElement('br'));
+
+      const bouton = document.createElement('button');
+      bouton.textContent = 'Voir sur la carte';
+      bouton.onclick = () => {
+        map.setView(l.coords, 18);
+        groupe.eachLayer(marker => {
+          if (marker.getLatLng().lat === l.coords[0] &&
+              marker.getLatLng().lng === l.coords[1]) {
+            marker.openPopup();
+          }
+        });
+      };
+      div.appendChild(bouton);
+      results.appendChild(div);
+    });
+
+    if (filtres.length === 0) {
+      results.textContent = 'Aucun lieu trouvé.';
+    }
+  }
+
+  search.addEventListener('input', afficherLieux);
+  cases.forEach(c => c.addEventListener('change', afficherLieux));
+
+  document.getElementById('reset').onclick = () => {
+    search.value = '';
+    cases.forEach(c => c.checked = true);
+    map.setView(centre, 16);
+    afficherLieux();
+  };
+
+  afficherLieux();
+</script>
 </body>
 </html>
 
-  </script>
-</body>
-</html>
