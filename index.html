@@ -1,10 +1,11 @@
 
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon TP Leaflet - Maroc</title>
+  <title>Carte Leaflet - Béni Mellal</title>
 
   <link rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -18,8 +19,8 @@
     header {
       background: #176b55;
       color: white;
-      padding: 16px;
       text-align: center;
+      padding: 15px;
     }
 
     #map {
@@ -29,9 +30,10 @@
   </style>
 </head>
 <body>
+
   <header>
-    <h2>Ma carte interactive du Maroc</h2>
-    <p>TP : découverte de Leaflet</p>
+    <h2>Carte interactive de Béni Mellal</h2>
+    <p>TP de cartographie avec Leaflet</p>
   </header>
 
   <div id="map"></div>
@@ -39,8 +41,10 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // Centrer la carte sur le Maroc
-    const map = L.map('map').setView([31.7917, -7.0926], 5);
+    // Centrer la carte sur Béni Mellal
+    const beniMellal = [32.3373, -6.3498];
+
+    const map = L.map('map').setView(beniMellal, 12);
 
     // Ajouter le fond de carte OpenStreetMap
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -48,39 +52,26 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Ajouter un marqueur à Marrakech
-    L.marker([31.6295, -7.9811])
+    // Ajouter un marqueur sur la ville
+    L.marker(beniMellal)
       .addTo(map)
-      .bindPopup('<b>Marrakech</b><br>Maroc')
+      .bindPopup('<b>Béni Mellal</b><br>Maroc')
       .openPopup();
 
-    // Ajouter un cercle
-    L.circle([31.6295, -7.9811], {
-      radius: 10000,
+    // Dessiner un cercle rouge de 2 km de rayon
+    L.circle(beniMellal, {
       color: 'red',
-      fillOpacity: 0.2
-    }).addTo(map).bindPopup('Zone autour de Marrakech');
+      fillColor: '#ff3333',
+      fillOpacity: 0.2,
+      radius: 2000,
+      weight: 3
+    }).addTo(map)
+      .bindPopup('Zone circulaire autour de Béni Mellal : rayon de 2 km');
 
-    // Ajouter un polygone
-    L.polygon([
-      [31.65, -8.05],
-      [31.60, -7.90],
-      [31.55, -8.02]
-    ], {
-      color: 'green'
-    }).addTo(map).bindPopup('Polygone de démonstration');
+  </script>
+</body>
+</html>
 
-    // Afficher les coordonnées lors d'un clic
-    map.on('click', function(e) {
-      L.popup()
-        .setLatLng(e.latlng)
-        .setContent(
-          'Coordonnées : ' +
-          e.latlng.lat.toFixed(5) + ', ' +
-          e.latlng.lng.toFixed(5)
-        )
-        .openOn(map);
-    });
   </script>
 </body>
 </html>
