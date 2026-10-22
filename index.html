@@ -3,281 +3,251 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IAV Campus Explorer</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Géoportail 3D — Campus IAV</title>
+
+<link href="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.css"
+      rel="stylesheet">
 
 <style>
-:root {
-  --green:#075e50; --dark:#123b35; --mint:#e5f5ed;
-  --bg:#f4f7f6; --text:#20332f; --muted:#788982;
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #17352c;
+  background: #f3f7f3;
 }
-* {box-sizing:border-box}
-body {margin:0;font-family:Inter,Arial,sans-serif;color:var(--text);background:var(--bg)}
-.topbar {
-  height:76px;background:#fff;display:flex;align-items:center;
-  justify-content:space-between;padding:0 30px;border-bottom:1px solid #e5ece8;
-  position:relative;z-index:500;
+
+header {
+  background: #123f32;
+  color: white;
+  padding: 20px 24px;
 }
-.brand {display:flex;align-items:center;gap:12px}
-.logo {
-  width:44px;height:44px;border-radius:14px;background:var(--green);
-  color:white;display:grid;place-items:center;font-size:20px;font-weight:800;
+
+header h1 { margin: 0 0 7px; font-size: 24px; }
+header p { margin: 0; color: #d8e9df; }
+
+main {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: calc(100vh - 90px);
 }
-.brand h1 {font-size:18px;margin:0;color:var(--dark);letter-spacing:-.5px}
-.brand p {font-size:11px;color:var(--muted);margin:4px 0 0}
-.top-right {display:flex;align-items:center;gap:12px}
-.status {font-size:11px;color:var(--green);background:var(--mint);padding:9px 12px;border-radius:20px;font-weight:700}
-.top-link {color:var(--green);font-size:13px;text-decoration:none;font-weight:600}
-.hero {
-  padding:25px 30px 23px;background:linear-gradient(115deg,#073e36,#08745d);
-  color:white;display:flex;justify-content:space-between;align-items:center;gap:20px;
+
+aside {
+  padding: 22px;
+  background: white;
+  border-right: 1px solid #dce7df;
 }
-.eyebrow {font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#b8e9d2;font-weight:700}
-.hero h2 {font-size:26px;margin:9px 0 7px;letter-spacing:-.8px}
-.hero p {font-size:12px;line-height:1.7;margin:0;color:#d5ebe3}
-.hero-badge {border:1px solid #ffffff35;border-radius:15px;padding:13px 16px;font-size:12px;line-height:1.8;min-width:155px}
-.app {display:grid;grid-template-columns:320px minmax(0,1fr);min-height:calc(100vh - 205px)}
-.sidebar {background:white;border-right:1px solid #e7eeea;padding:22px 20px}
-.section-label {font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0 0 12px}
-.searchbox {position:relative;margin-bottom:23px}
-.searchbox input {
-  width:100%;border:1px solid #e0e8e3;background:#f8faf9;border-radius:11px;
-  padding:14px 13px 14px 39px;outline:none;font:inherit;font-size:12px;
+
+h2 { font-size: 18px; }
+input, button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 9px;
+  font-size: 14px;
 }
-.searchbox input:focus {border-color:#258b70;box-shadow:0 0 0 3px #258b7018}
-.search-icon {position:absolute;left:13px;top:12px;font-size:16px}
-.stats {display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
-.stat {padding:13px;background:#f4f8f6;border:1px solid #e9f0ec;border-radius:12px}
-.stat strong {font-size:22px;color:var(--green);display:block}
-.stat span {font-size:10px;color:var(--muted);display:block;margin-top:4px}
-.category-list {display:grid;gap:7px;margin-bottom:23px}
+
+input {
+  border: 1px solid #cad8ce;
+  margin-bottom: 10px;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: #176b4c;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 9px;
+}
+
+button:hover { background: #0d5138; }
+
 .category {
-  display:flex;align-items:center;gap:11px;padding:11px;border:1px solid transparent;
-  border-radius:11px;cursor:pointer;transition:.15s;
+  display: block;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf1ed;
 }
-.category:hover {background:#f6faf7}
-.category:has(input:checked) {background:#edf7f1;border-color:#d7ecdf}
-.category input {accent-color:var(--green);width:15px;height:15px}
-.cat-icon {width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:white;font-size:17px}
-.cat-text {font-size:12px;font-weight:600;flex:1}
-.cat-count {font-size:10px;color:var(--muted)}
-.primary,.secondary {
-  width:100%;padding:12px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;
+
+.category input {
+  width: auto;
+  margin: 0 8px 0 0;
 }
-.primary {background:var(--green);border:1px solid var(--green);color:white}
-.primary:hover {background:#06483e}
-.secondary {margin-top:8px;background:white;border:1px solid #dfe8e3;color:var(--dark)}
-.side-note {margin-top:23px;padding-top:17px;border-top:1px solid #edf0ee;color:var(--muted);font-size:10px;line-height:1.8}
-.map-panel {min-width:0;position:relative;min-height:600px}
-#map {height:100%;min-height:600px;width:100%;background:#e8efea}
-.map-chip {
- position:absolute;z-index:400;top:17px;left:17px;background:white;
- border:1px solid #e7ece8;border-radius:12px;padding:11px 14px;
- box-shadow:0 4px 18px #16382d12;font-size:11px;pointer-events:none;
+
+#map {
+  min-height: 650px;
+  width: 100%;
 }
-.map-chip strong {display:block;font-size:12px;margin-bottom:4px}
-.map-controls {position:absolute;right:16px;top:17px;z-index:400;display:grid;gap:8px}
-.map-controls button {background:white;border:1px solid #e3eae5;border-radius:10px;padding:11px 13px;color:var(--dark);font-weight:700;cursor:pointer;box-shadow:0 3px 12px #16382d10}
-.map-controls button:hover {background:var(--mint)}
-.leaflet-popup-content-wrapper {border-radius:13px}
-.leaflet-popup-content {font-family:Inter,Arial,sans-serif;font-size:12px;line-height:1.8}
-.popup-title {font-size:14px;font-weight:800;color:var(--dark)}
-.popup-tag {display:inline-block;background:var(--mint);color:var(--green);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
-.footer {padding:13px 22px;display:flex;justify-content:space-between;gap:12px;background:white;border-top:1px solid #e8eeea;font-size:10px;color:var(--muted)}
-@media(max-width:760px) {
- .topbar {padding:0 15px;height:66px}
- .brand h1 {font-size:15px}
- .status {display:none}
- .hero {padding:22px 17px}
- .hero h2 {font-size:22px}
- .hero-badge {display:none}
- .app {grid-template-columns:1fr}
- .sidebar {border-right:0;padding:17px}
- .stats {grid-template-columns:1fr 1fr}
- .map-panel,#map {min-height:65vh}
- .footer {flex-direction:column}
+
+.map-panel { position: relative; }
+
+.map-buttons {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.map-buttons button {
+  width: auto;
+  box-shadow: 0 2px 8px #0002;
+}
+
+.note {
+  color: #66796d;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 18px;
+}
+
+@media (max-width: 750px) {
+  main { grid-template-columns: 1fr; }
+  aside { border-right: 0; }
+  #map { min-height: 65vh; }
 }
 </style>
 </head>
-<body>
 
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">IAV</div>
-    <div>
-      <h1>Campus Explorer</h1>
-      <p>Géoportail intelligent du campus</p>
-    </div>
-  </div>
-  <div class="top-right">
-    <span class="status">● Carte interactive</span>
-    <a class="top-link" href="https://github.com/" target="_blank">GitHub ↗</a>
-  </div>
+<body>
+<header>
+  <h1>🌿 Géoportail 3D — Campus IAV</h1>
+  <p>Explorer les espaces du campus Hassan II à Rabat</p>
 </header>
 
-<section class="hero">
-  <div>
-    <div class="eyebrow">Institut Agronomique et Vétérinaire Hassan II</div>
-    <h2>Explorez votre campus.</h2>
-    <p>Trouvez les bâtiments, services et espaces qui vous intéressent.</p>
-  </div>
-  <div class="hero-badge">📍 Rabat, Maroc<br>🌿 Campus & équipements</div>
-</section>
+<main>
+  <aside>
+    <h2>Explorer le campus</h2>
 
-<main class="app">
-  <aside class="sidebar">
-    <p class="section-label">Explorer la carte</p>
-    <div class="searchbox">
-      <span class="search-icon">⌕</span>
-      <input id="search" type="search" placeholder="Rechercher un lieu...">
-    </div>
+    <input id="search" type="search"
+           placeholder="Rechercher un lieu…">
+    <button id="searchBtn">Rechercher</button>
 
-    <div class="stats">
-      <div class="stat"><strong id="total">5</strong><span>Lieux affichés</span></div>
-      <div class="stat"><strong>4</strong><span>Catégories</span></div>
-    </div>
+    <h2>Catégories</h2>
+    <label class="category">
+      <input type="checkbox" checked> Formations et amphithéâtres
+    </label>
+    <label class="category">
+      <input type="checkbox" checked> Administration et services
+    </label>
+    <label class="category">
+      <input type="checkbox" checked> Bibliothèque et culture
+    </label>
+    <label class="category">
+      <input type="checkbox" checked> Restaurants et résidence
+    </label>
+    <label class="category">
+      <input type="checkbox" checked> Sport et santé
+    </label>
 
-    <p class="section-label">Catégories de lieux</p>
-    <div class="category-list">
-      <label class="category">
-        <input type="checkbox" value="Enseignement" checked>
-        <span class="cat-icon">🎓</span><span class="cat-text">Enseignement</span><span class="cat-count">02</span>
-      </label>
-      <label class="category">
-        <input type="checkbox" value="Restauration" checked>
-        <span class="cat-icon">☕</span><span class="cat-text">Restauration</span><span class="cat-count">01</span>
-      </label>
-      <label class="category">
-        <input type="checkbox" value="Services" checked>
-        <span class="cat-icon">📚</span><span class="cat-text">Bibliothèques & services</span><span class="cat-count">01</span>
-      </label>
-      <label class="category">
-        <input type="checkbox" value="Espaces verts" checked>
-        <span class="cat-icon">🌳</span><span class="cat-text">Espaces verts</span><span class="cat-count">01</span>
-      </label>
-    </div>
-
-    <button class="primary" id="reset">↺ &nbsp; Réinitialiser les filtres</button>
-    <button class="secondary" id="all">◎ &nbsp; Voir tous les lieux</button>
-
-    <div id="results"></div>
-    <div class="side-note">
-      <strong>À propos de la carte</strong><br>
-      Projet pédagogique réalisé avec Leaflet et OpenStreetMap. Les lieux affichés sont des exemples de démonstration et leurs coordonnées doivent être vérifiées.
-    </div>
+    <p class="note">
+      Utilise les boutons 2D et 3D pour changer la perspective.
+      Fais glisser la carte pour te déplacer et utilise la molette
+      pour zoomer. Les bâtiments en relief dépendent des données
+      cartographiques disponibles.
+    </p>
   </aside>
 
   <section class="map-panel">
+    <div class="map-buttons">
+      <button id="view2d">Vue 2D</button>
+      <button id="view3d">Vue 3D</button>
+    </div>
     <div id="map"></div>
-    <div class="map-chip">
-      <strong>🗺️ Carte du campus</strong>
-      <span id="map-status">Explorez les lieux disponibles</span>
-    </div>
-    <div class="map-controls">
-      <button id="zoomCampus">⌖ &nbsp; Vue du campus</button>
-      <button id="zoomIn">＋ &nbsp; Zoom avant</button>
-      <button id="zoomOut">－ &nbsp; Zoom arrière</button>
-    </div>
   </section>
 </main>
 
-<footer class="footer">
-  <span>© 2026 · IAV Campus Explorer · Projet pédagogique</span>
-  <span>Cartographie avec Leaflet · Fond © OpenStreetMap contributors</span>
-</footer>
+<script src="https://unpkg.com/maplibre-gl@5.12.0/dist/maplibre-gl.js"></script>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const centre = [33.971, -6.853];
-const map = L.map('map', { zoomControl: false }).setView(centre, 16);
+const campus = [-6.866, 33.985];
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://tiles.openfreemap.org/styles/bright',
+  center: campus,
+  zoom: 16,
+  pitch: 55,
+  bearing: -15,
+  maxPitch: 75,
+  attributionControl: true
+});
 
-const lieux = [
-  {nom:'Campus IAV', categorie:'Enseignement', coords:[33.971,-6.853], description:'Point central de démonstration.', emoji:'🎓'},
-  {nom:"Bâtiment d’enseignement A", categorie:'Enseignement', coords:[33.972,-6.854], description:'Coordonnées à vérifier sur le terrain.', emoji:'🏫'},
-  {nom:'Bibliothèque', categorie:'Services', coords:[33.9705,-6.852], description:'Coordonnées à vérifier sur le terrain.', emoji:'📚'},
-  {nom:'Restaurant universitaire', categorie:'Restauration', coords:[33.970,-6.854], description:'Coordonnées à vérifier sur le terrain.', emoji:'☕'},
-  {nom:'Espace vert', categorie:'Espaces verts', coords:[33.972,-6.8515], description:'Coordonnées à vérifier sur le terrain.', emoji:'🌳'}
-];
+map.addControl(new maplibregl.NavigationControl(), 'top-right');
+map.addControl(new maplibregl.ScaleControl(), 'bottom-left');
 
-const layer = L.layerGroup().addTo(map);
-const search = document.getElementById('search');
-const results = document.getElementById('results');
-const checks = [...document.querySelectorAll('.category input')];
-
-function render() {
-  layer.clearLayers();
-  results.innerHTML = '';
-  const q = search.value.trim().toLocaleLowerCase('fr');
-  const cats = checks.filter(c => c.checked).map(c => c.value);
-  const filtered = lieux.filter(l =>
-    l.nom.toLocaleLowerCase('fr').includes(q) && cats.includes(l.categorie)
-  );
-
-  document.getElementById('total').textContent = filtered.length;
-  document.getElementById('map-status').textContent =
-    filtered.length + ' lieu(x) correspondant(s)';
-
-  filtered.forEach(l => {
-    const popup = `<div class="popup-title">${l.emoji} ${l.nom}</div>
-      <span class="popup-tag">${l.categorie}</span><p>${l.description}</p>`;
-    L.marker(l.coords).addTo(layer).bindPopup(popup);
-
-    const item = document.createElement('div');
-    item.style.cssText = 'padding:12px 0;border-bottom:1px solid #edf0ee';
-    const title = document.createElement('div');
-    title.style.cssText = 'font-size:12px;font-weight:700;margin-bottom:7px';
-    title.textContent = l.emoji + ' ' + l.nom;
-    const tag = document.createElement('div');
-    tag.style.cssText = 'font-size:10px;color:#788982;margin-bottom:8px';
-    tag.textContent = l.categorie;
-    const btn = document.createElement('button');
-    btn.className = 'secondary';
-    btn.textContent = 'Voir sur la carte →';
-    btn.onclick = () => {
-      map.flyTo(l.coords, 18, {duration:0.7});
-      layer.eachLayer(m => {
-        const p = m.getLatLng();
-        if (p.lat === l.coords[0] && p.lng === l.coords[1]) m.openPopup();
-      });
-    };
-    item.append(title, tag, btn);
-    results.appendChild(item);
+map.on('load', () => {
+  // Source de bâtiments vectoriels
+  map.addSource('openfreemap-buildings', {
+    type: 'vector',
+    url: 'https://tiles.openfreemap.org/planet'
   });
 
-  if (!filtered.length) {
-    results.textContent = 'Aucun lieu trouvé. Essayez un autre mot-clé.';
+  // Bâtiments en relief lorsque leurs données existent
+  map.addLayer({
+    id: 'campus-buildings-3d',
+    source: 'openfreemap-buildings',
+    'source-layer': 'building',
+    type: 'fill-extrusion',
+    minzoom: 14,
+    paint: {
+      'fill-extrusion-color': '#d5b99a',
+      'fill-extrusion-height': [
+        'interpolate', ['linear'], ['zoom'],
+        14, 0,
+        16, ['coalesce', ['get', 'render_height'], 8]
+      ],
+      'fill-extrusion-base': [
+        'coalesce', ['get', 'render_min_height'], 0
+      ],
+      'fill-extrusion-opacity': 0.9
+    }
+  });
+
+  // Marqueur de repère du campus : position approximative
+  new maplibregl.Marker({ color: '#16734a' })
+    .setLngLat(campus)
+    .setPopup(new maplibregl.Popup().setText(
+      'Repère indicatif du campus IAV — vérifie la position exacte.'
+    ))
+    .addTo(map);
+});
+
+document.getElementById('view2d').addEventListener('click', () => {
+  map.easeTo({ pitch: 0, bearing: 0, duration: 1000 });
+});
+
+document.getElementById('view3d').addEventListener('click', () => {
+  map.easeTo({ pitch: 60, bearing: -20, duration: 1000 });
+});
+
+function searchCampus() {
+  const query = document.getElementById('search').value.trim();
+
+  if (!query) {
+    map.flyTo({ center: campus, zoom: 16 });
+    return;
   }
+
+  // Recherche illustrative : recentre sur le campus.
+  // Ce n'est pas encore une recherche réelle de bâtiments.
+  map.flyTo({ center: campus, zoom: 18, pitch: 55 });
+  alert('Pour localiser « ' + query +
+        ' », il faudra ajouter les vrais lieux du campus.');
 }
 
-search.addEventListener('input', render);
-checks.forEach(c => c.addEventListener('change', render));
+document.getElementById('searchBtn')
+  .addEventListener('click', searchCampus);
 
-document.getElementById('reset').onclick = () => {
-  search.value = '';
-  checks.forEach(c => c.checked = true);
-  render();
-};
-document.getElementById('all').onclick = () => {
-  search.value = '';
-  checks.forEach(c => c.checked = true);
-  render();
-  const bounds = L.latLngBounds(lieux.map(l => l.coords));
-  map.flyToBounds(bounds, {padding:[50,50], maxZoom:16});
-};
-document.getElementById('zoomCampus').onclick = () => map.flyTo(centre,16);
-document.getElementById('zoomIn').onclick = () => map.zoomIn();
-document.getElementById('zoomOut').onclick = () => map.zoomOut();
-
-render();
+document.getElementById('search')
+  .addEventListener('keydown', event => {
+    if (event.key === 'Enter') searchCampus();
+  });
 </script>
 </body>
 </html>
+
 
 
